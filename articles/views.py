@@ -1,3 +1,4 @@
+from rest_framework.generics import get_object_or_404   # import 할 때 from 조심하기!
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
@@ -23,13 +24,28 @@ class ArticleView(APIView):    # /articles/
         
 class ArticleDetailView(APIView): # /articles/{article_id}
     def get(self, request, article_id):     # detail READ
-        pass
+        article = get_object_or_404(Article, id=article_id)    # list READ와 차이점: all을 가져오는 게 아니라 get(id)로 해당하는 article_id 의 article하나만 가져옴
+        serializer = ArticleSerializer(article)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
     
     def put(self, request, article_id):    #  detail UPDATE
-        pass
+        article = get_object_or_404(Article, id=article_id) # 안될 때 바로 404 띄워준다!
+        if request.user == article.user:
+            serializer = ArticleCreateSerializer(article, data=request.data)
+            if serializer.is_valid():
+                serializer.save(user=request.user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
     
     def delete(self, request, article_id):    #  detail DELETE
-        pass
+        article = get_object_or_404(Article, id=article_id)
+        if request.user == article.user:
+            article.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
     
     
 
