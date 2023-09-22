@@ -4,7 +4,7 @@ from users.models import User
 # Create your models here.
 
 class Article(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     content = models.TextField()
     image = models.ImageField(blank=True, upload_to='%Y/%m/%d/')   # 이미지필드에서 null=True 가 의미없다.
