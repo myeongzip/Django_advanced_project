@@ -5,6 +5,7 @@ from articles import views
 
 urlpatterns = [
     path('', views.ArticleView.as_view(), name="article_view"),
+    path('feed/', views.FeedView.as_view(), name="feed_view"),    # follow하고 있는 사람들의 글만 볼 수 있게
     path('<int:article_id>/',views.ArticleDetailView.as_view(), name="article_detail_view"),
     path('<int:article_id>/comment/', views.CommentView.as_view(), name="comment_view"), # '<int:article_id>/comment/'로 하는 방법도 있지만, body 안에 article_id를 보내고자 함.
     path('<int:article_id>/comment/<int:comment_id>/', views.CommentDetailView.as_view(), name="comment_detail_view"),  # article_id가 빠져도 되지만, 통일성을 위해 유지함.
