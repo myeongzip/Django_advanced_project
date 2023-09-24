@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 
-from articles.models import Article
-from articles.serializers import ArticleCreateSerializer, ArticleSerializer, ArticleListSerializer
+from articles.models import Article, Comment
+from articles.serializers import ArticleCreateSerializer, ArticleSerializer, ArticleListSerializer, CommentCreateSerializer, CommentSerializer
 
 class ArticleView(APIView):    # /articles/
     def get(self, request, format=None):    # list READ
@@ -50,22 +50,44 @@ class ArticleDetailView(APIView): # /articles/{article_id}
     
 
 class CommentView(APIView):    # /comment/
-    def get(self, request):    # comments of certain article, list READ
-        pass
+    def get(self, request, article_id):    # comments of certain article, list READ
+        article = Article.objects.get(id=article_id)  # 이 api가 실제로 얼마나 쓰일지는 생각해불 문제다...
+        comments = article.comment_set.all() # 역참조-> related_name인데, 기본값=comment_set
+        serializer = CommentSerializer(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
     
-    def post(self, request):    # CREATE
-        pass
+    def post(self, request, article_id):    # CREATE
+        serializer = CommentCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user, article_id=article_id)   # article = Article.objetcts.get(id=article_id)인스턴스로 가져올 수도 있음.
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:   
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                
     
     
 
 class CommentDetailView(APIView): # /comment/{comment_id}
-    def put(self, request, article_id):    #  comment_detail UPDATE
-        pass
-    
-    def delete(self, request, article_id):    #  comment_detail DELETE
-        pass
+    def put(self, request, article_id, comment_id):    #  comment_detail UPDATE
+        comment = get_object_or_404(Comment, id=comment_id)
+        serializer = CommentCreateSerializer(comment, data=request.data)    # content를 제외한 comment의 데이터를 바꿈
+        if request.user == comment.user:
+            if serializer.is_valid():
+                serializer.save()    # comment의 다른 데이터(user, article_id, comment_id)를 따로 집어넣어줄 필요 없음
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
+            
+    def delete(self, request,article_id, comment_id):    #  comment_detail DELETE
+        comment = get_object_or_404(Comment, id=comment_id)
+        if request.user == comment.user:
+            comment.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response("권한이 없습니다.", status=status.HTTP_403_FORBIDDEN)
+            
     
     
 class LikeView(APIView):    # /like/
-    def post(self, request):    # like
+    def post(self, request, article_id):    # like
         pass
