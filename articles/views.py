@@ -88,6 +88,12 @@ class CommentDetailView(APIView): # /comment/{comment_id}
             
     
     
-class LikeView(APIView):    # /like/
+class LikeView(APIView):    # <int:article_id>/like/
     def post(self, request, article_id):    # like
-        pass
+        article = get_object_or_404(Article, id=article_id)
+        if request.user in article.likes.all():
+            article.likes.remove(request.user)
+            return Response("like가 취소됐습니다.", status=status.HTTP_200_OK)
+        else:
+            article.likes.add(request.user)
+            return Response("게시물을 like 합니다", status=status.HTTP_200_OK)
