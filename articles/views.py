@@ -6,6 +6,8 @@ from rest_framework import status, permissions
 from articles.models import Article, Comment
 from articles.serializers import ArticleCreateSerializer, ArticleSerializer, ArticleListSerializer, CommentCreateSerializer, CommentSerializer
 
+from django.db.models.query_utils import Q
+
 class ArticleView(APIView):    # /articles/
     def get(self, request, format=None):    # list READ
         articles = Article.objects.all()
@@ -22,6 +24,17 @@ class ArticleView(APIView):    # /articles/
             print(serializer.errors)        
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
+class FeedView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    # followers.ArticleListSerializer
+    def get(self, request):    # 로그인한 계정이 follow한 게시글들만 READ
+        q = Q()
+        for user in request.user.followings.all():  # Q object를 이용해서, 로그인한 user의 follow한 user들의 게시글 불러오기
+            q.add(Q(user=user),q.OR)
+        feeds = Article.objects.filter(q)       # user가 user=user에 해당하는지(로그인한 user가 follow한 user인지 확인) 확인해, 해당되는 user의 article object들을 OR 조건으로 모두 가져옴.
+        serializer = ArticleListSerializer(feeds, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK) 
+       
 class ArticleDetailView(APIView): # /articles/{article_id}
     def get(self, request, article_id):     # detail READ
         article = get_object_or_404(Article, id=article_id)    # list READ와 차이점: all을 가져오는 게 아니라 get(id)로 해당하는 article_id 의 article하나만 가져옴

@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import (
 )
 from articles.models import Article
 from users.models import User
-from users.serializers import CustomTokenObtainPairSerializer, UserSerializer
+from users.serializers import CustomTokenObtainPairSerializer, UserProfileSerializer, UserSerializer
 from rest_framework.generics import get_object_or_404 
 
 class UserView(APIView):
@@ -38,3 +38,10 @@ class FollowView(APIView):  # 좋아요와 로직이 비슷함. -> 좋아요 vie
         else:
             you.followers.add(me)
             return Response("follow 합니다", status=status.HTTP_200_OK)
+        
+        
+class ProfileView(APIView):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)

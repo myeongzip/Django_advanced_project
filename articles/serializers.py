@@ -53,6 +53,12 @@ class ArticleListSerializer(serializers.ModelSerializer):
         model = Article
         fields = ("pk", "title", "image", "updated_at", "user", "likes_count", "comment_set_count")
         
+# class FeedSerializer(serializers.ModelSerializer):
+#     followers = serializers.StringRelatedField(many=True)
+#     article_set = ArticleListSerializer(many=True)
+#     class Meta:
+#         model = Article
+#         fields = ("")
         
 class ArticleUpdateSerializer(serializers.ModelSerializer):
     class Meta:                 

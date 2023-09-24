@@ -12,4 +12,5 @@ urlpatterns = [
     path('api/token/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'), # 로그인할 때 simplejwt에서 token obtain pair view를 가져와서 사용하고 있음. -> custom user를 해줘야하기에 views에서 만들어준다!
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('follow/<int:user_id>/', views.FollowView.as_view(), name="follow_view"),
+    path('<int:user_id>/', views.ProfileView.as_view(), name="profile_view"),
 ]
