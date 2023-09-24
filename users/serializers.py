@@ -1,7 +1,18 @@
 from rest_framework import serializers
 from users.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from articles.serializers import ArticleListSerializer
 
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    followings = serializers.StringRelatedField(many=True)
+    followers = serializers.StringRelatedField(many=True)
+    article_set = ArticleListSerializer(many=True)
+    like_articles = ArticleListSerializer(many=True)
+    
+    class Meta:
+        model = User
+        fields = ("id","email","followings", "followers", "article_set", "like_articles")
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,7 +40,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user) # serializer 회원가입 create 만들 때랑 비슷한 형태
 
-        # Add custom claims, jwt decoded-payload 부분
+        # Add custom claims, jwt decoded-payload 부분 // payload customizing
         token['email'] = user.email
 
         return token

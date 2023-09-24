@@ -41,7 +41,7 @@ class User(AbstractBaseUser):
     )
     
     
-    followings = models.ManyToManyField('self', symmetrical=False, related_name="followers")   # symmetrical=True (싸이월드 일촌), symmetrical=False(인스타 팔로우, 단방향)
+    followings = models.ManyToManyField('self', symmetrical=False, related_name="followers", blank=True)   # symmetrical=True (싸이월드 일촌), symmetrical=False(인스타 팔로우, 단방향)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
 
